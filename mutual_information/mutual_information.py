@@ -270,16 +270,17 @@ def mutual_information(x:list, y:list = None, base:int = 2, **args):
         print(f"Mutual Information in base {base}: {str(resp)}\nNormalized Mutual Information: {str(normalized)}\n" +  "-" * 50 + "\n")
 
         if normalized < 0.05:
-            print("Strong evidence that the distribution is random\n")
+            if number_of_samples(x, y, 0.95, 2, print = False) < len(x):
+                print("Strong evidence that the distribution is random\n")
         elif normalized > 0.95:
-            print("Strong evidence that the distribution is not random\n")
+            if number_of_samples(x, y, 0.95, 2, print = False) < len(x):
+                print("Strong evidence that the distribution is not random\n")
         
     return resp, normalized
 
 
 if __name__ == "__main__":
 ##    from sklearn.metrics import mutual_info_score, normalized_mutual_info_score
-    from random import random
 
     # Exemplo de duas listas de valores
 ##    lista1 = ["a", "b", "a", "a", "c", "c", "b"]
