@@ -6,4 +6,4 @@ metrics.egg-info/dependency_links.txt
 metrics.egg-info/top_level.txt
 mutual_information/__init__.py
 mutual_information/metrics.py
-mutual_information/mutual_information.py
+mutual_information/normalized_mutual_information.py
