@@ -280,6 +280,7 @@ def mutual_information(x:list, y:list = None, base:int = 2, **args):
 
 
 if __name__ == "__main__":
+    pass
 ##    from sklearn.metrics import mutual_info_score, normalized_mutual_info_score
 
     # Exemplo de duas listas de valores
