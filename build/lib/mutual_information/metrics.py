@@ -399,10 +399,10 @@ def print_metrics(clusters:list, dataframe:list, clusters_real:list = None):
     c = []
     for cluster in clusters:
         c.append(max(cluster) + 1 - min(cluster))   
-    calinski_harabasz_graphic(l, dataframe, c)
-    davies_boulding_graphic(l, dataframe, c)
-    mutual_information_graphic(l, clusters_real, c)
-    Silhouette_analysis(l, dataframe, c)
+    calinski_harabasz_graphic(clusters, dataframe, c)
+    davies_boulding_graphic(clusters, dataframe, c)
+    mutual_information_graphic(clusters, clusters_real, c)
+    Silhouette_analysis(clusters, dataframe, c)
 
 def print_graph(results:dict, cr:int = -2, title:str = "title"):
     ch = list(results.values())

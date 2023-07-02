@@ -7,3 +7,4 @@ metrics.egg-info/requires.txt
 metrics.egg-info/top_level.txt
 mutual_information/__init__.py
 mutual_information/metrics.py
+mutual_information/normalized_mutual_information.py
