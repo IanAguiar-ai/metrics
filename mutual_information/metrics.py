@@ -364,44 +364,22 @@ if __name__ == "__main__":
 ##    number_of_samples(text1, text2, 0.95, 2)
 
 
-def adjust_matrix(clusters:list, dataframe = None):
-    """
-    Takes the array that the user passes and leaves it in the form that the code understands.
-
-    :param clusters: Matrix with the various clusterings, the sorting can be either by row or by column
-    :type clusters: list of lists or dataframe (pandas) or array (numpy)
-
-    :param dataframe: Dataframe with numerical variables that were used for clustering.
-    :type dataframe: dataframe (pandas) or array (numpy)
-
-    ▬ return:
-    • Dictionary where the first level key is the number of clusters and the second level key is the clustering;
-    """
-
-##    if type(clusters) == list and type(clusters[0]) == list:
-##        d = {}
-##        if not len(clusters) == len(dataframe):
-##            #transpor o clusters
-##            pass
-##
-##        for i in range(len(clusters)):
-##            d[max(clusters[i])] = {"melhor_caso":clusters[i]}
+def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, errors = True):
 
     if type(clusters) == type(pd.DataFrame()):
-        clusters = clusters.values.tolist()
+        clusters = clusters.T.values.tolist()
 
-    if type(dataframe) == type(dataframe.DataFrame()):
-        dataframe = dataframe.values.tolist()
-
-    return clusters, dataframe
-
-def print_metrics(clusters:list, dataframe:list, clusters_real:list = None):
+    if type(dataframe) == type(pd.DataFrame()):
+        dataframe = dataframe.values    
+    
     c = []
     for cluster in clusters:
-        c.append(max(cluster) + 1 - min(cluster))   
+        c.append(max(cluster) + 1 - min(cluster))
+    
     calinski_harabasz_graphic(clusters, dataframe, c)
     davies_boulding_graphic(clusters, dataframe, c)
-    mutual_information_graphic(clusters, clusters_real, c)
+    if clusters_real != None:
+        mutual_information_graphic(clusters, clusters_real, c)
     Silhouette_analysis(clusters, dataframe, c)
 
 def print_graph(results:dict, cr:int = -2, title:str = "title"):
@@ -626,3 +604,9 @@ if __name__ == "__main__":
     #mutual_information_graphic(l, y_simulado, c)
     #Silhouette_analysis(l, X, c)
     print_metrics(l,X ,y_simulado)
+    print_metrics(pd.DataFrame({'2': [int(random()*3) for i in range(50)],
+                                '3': [int(random()*9) for i in range(50)],
+                                '6': [int(random()*5) for i in range(50)]}),
+                  pd.DataFrame({'2': [int(random()*3) for i in range(50)],
+                                '3': [int(random()*9) for i in range(50)],
+                                '6': [int(random()*5) for i in range(50)]}))
