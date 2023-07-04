@@ -285,87 +285,7 @@ def mutual_information(x:list, y:list = None, base:int = 2, **args):
         
     return resp, normalized
 
-
-if __name__ == "__main__":
-    pass
-##    from sklearn.metrics import mutual_info_score, normalized_mutual_info_score
-
-    # Exemplo de duas listas de valores
-##    lista1 = ["a", "b", "a", "a", "c", "c", "b"]
-##    lista2 = ["ab", "ab", "aa", "ac", "ac", "aa", "ad"]
-
-#Moeda que controla dado, se cair cara o dado cai 1 a 3
-
-##    lista1 = [int(random()*2) for i in range(100)]
-##    lista2 = []
-##
-##    for i in lista1:
-##        if i == 0:
-##            lista2.append(int(random()*3)+1)
-##        else:
-##            lista2.append(int(random()*6)+1)
-
-
-    #Uno 4x4:
-##    l = ["a","b","c","d"]
-##
-##    lista1 = [l[int(random()*4)] + str(int(random()*4)) for i in range(100000)]
-##
-##    lista2 = []
-##
-##    for i in range(len(lista1)):
-##        if random() > 0.5:
-##            lista2.append(l[int(random()*4)] + lista1[i][1])
-##        else:
-##            lista2.append(lista1[i][0] + str(int(random()*4)))
-
-##    for categorias in range(2,10+1):
-##        k = int(categorias ** (1.62) * 10)
-##        print("-"*50)         
-##        NMI = []
-##        for n in range(100):
-##            lista1 = [int(random()*categorias) for i in range(k)]
-##            lista2 = [int(random()*categorias) for i in range(k)]
-##            _, nmi = mutual_information(lista1, lista2, print = False)
-##            NMI.append(nmi)
-##
-##        print(f"Para {categorias} categorias e {k} amostras em média {sum(NMI)/len(NMI)} e maximo de {max(NMI)}")
-        
-
-##    # Calcular a informação mútua
-##    mi = mutual_info_score(lista1, lista2)
-##    print("Informação Mútua:", mi)
-##
-##    # Calcular a informação mútua normalizada
-##    nmi = normalized_mutual_info_score(lista1, lista2)
-##    print("Informação Mútua Normalizada:", nmi)
-
-##    a, b = 7, 7
-##    lista1 = [int(random()*a) for i in range(100)]
-##    lista2 = [int(random()*b) for i in range(100)]
-##    number_of_samples(lista1, lista2, 0.95, 1.1)
-
-##    text = """
-##Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
-##It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
-##There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc.
-##Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32.
-##""".lower()
-##
-##    print(len(text))
-##
-##    text1 = list(map(str,list(map(ord,text))))
-##    text2 = list(map(str,list(map(ord,text[1:] + text[0:1]))))
-##    
-##    mutual_information(text1, text2)
-    
-##    mutual_information([[2216/2-1,1],[1,2216/2-1]])
-##
-##    number_of_samples(text1, text2, 0.95, 2)
-
-
 def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, errors = True):
-
     if type(clusters) == type(pd.DataFrame()):
         clusters = clusters.T.values.tolist()
 
@@ -375,12 +295,65 @@ def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, erro
     c = []
     for cluster in clusters:
         c.append(max(cluster) + 1 - min(cluster))
-    
-    calinski_harabasz_graphic(clusters, dataframe, c)
-    davies_boulding_graphic(clusters, dataframe, c)
+
+    r1 = silhouette_analysis(clusters, dataframe, c, print = False)
+    r2 = calinski_harabasz_graphic(clusters, dataframe, c, print = False)
+    r3 = davies_boulding_graphic(clusters, dataframe, c, print = False)
     if clusters_real != None:
-        mutual_information_graphic(clusters, clusters_real, c)
-    Silhouette_analysis(clusters, dataframe, c)
+        r4 = mutual_information_graphic(clusters, clusters_real, c, print = False)
+
+    fig, ax = plt.subplots(nrows = 2, ncols = 2, figsize = (14, 8))
+    try:
+        variables = [[0,0,1,1],
+                     [0,1,0,1],
+                     [r1, r2, r3, r4],
+                     [2, -1, 2, 2],
+                     ["Silhouette Analysis",
+                      "Calinski-Harabasz",
+                      "Davies-Boulding",
+                      "Normalized Mutual Information"]]
+    except:
+        variables = [[0,0,1],
+                     [0,1,0],
+                     [r1, r2, r3],
+                     [2, -1, 2],
+                     ["Silhouette Analysis",
+                      "Calinski-Harabasz",
+                      "Davies-Boulding"]]
+    
+    for i, j, ch_, cr, title in zip(*variables):
+        #print(i, j, cr)
+        ch = list(ch_.values())
+        colors = []
+        for val in ch:
+            if cr < 0:
+                if val >= sorted(ch)[cr]:
+                    colors.append('red')
+                else:
+                    colors.append('grey')
+            else:
+                if val <= sorted(ch)[cr]:
+                    colors.append('red')
+                else:
+                    colors.append('grey')
+
+        ax[i, j].bar(list(map(str,list(ch_.keys()))), ch, color=colors)
+        ax[i, j].set_xlabel("Number of clusters")
+        ax[i, j].set_ylabel(f"{title} Index")
+        #ax[i, j].set_suptitle(f"{title} by Number of Clusters")
+        ax[i, j].set_ylim((min(ch)/max(ch)) * min(ch), max(ch) * 1.1)
+
+        max_index = np.argmax(ch)
+        min_index = np.argmin(ch)
+        ax[i, j].text(max_index, ch[max_index], f'{ch[max_index]:.2f}', ha='center', va='bottom')
+        ax[i, j].text(min_index, ch[min_index], f'{ch[min_index]:.2f}', ha='center', va='bottom')
+
+    if len(variables[0]) == 3:
+            ax[1][1].text(0.2, 0.2, 'To plot the normalized mutual information\nyou also need to pass a list of expected\nvalues as an argument.', fontsize = 12)
+            
+    fig.suptitle(f"All Metrics")
+    fig.show()
+    
 
 def print_graph(results:dict, cr:int = -2, title:str = "title"):
     ch = list(results.values())
@@ -410,7 +383,7 @@ def print_graph(results:dict, cr:int = -2, title:str = "title"):
 
     plt.show()
 
-def calinski_harabasz_graphic(clusters:list, X = None, groups = None, title = "Calinski-Harabasz", cr = -2):
+def calinski_harabasz_graphic(clusters:list, X = None, groups = None, title = "Calinski-Harabasz", cr = -2, print = True):
     results = {}
     
     i = 0
@@ -419,9 +392,12 @@ def calinski_harabasz_graphic(clusters:list, X = None, groups = None, title = "C
         results.update({groups[i]: ch_index})
         i += 1
 
-    print_graph(results, title = title, cr = cr)
+    if print:
+        print_graph(results, title = title, cr = cr)
+    else:
+        return results
 
-def davies_boulding_graphic(clusters:list, X = None, groups = None, title = "Davies-Boulding", cr = 1):
+def davies_boulding_graphic(clusters:list, X = None, groups = None, title = "Davies-Boulding", cr = 1, print = True):
     results = {}
     
     i = 0
@@ -429,10 +405,13 @@ def davies_boulding_graphic(clusters:list, X = None, groups = None, title = "Dav
         ch_index = davies_bouldin_score(X, list(map(int, cluster)))
         results.update({groups[i]: ch_index})
         i += 1
+        
+    if print:
+        print_graph(results, title = title, cr = cr)
+    else:
+        return results
 
-    print_graph(results, title = title, cr = cr)
-
-def mutual_information_graphic(clusters:list, y:list = None,  groups = None, title = "Normalized Mutual Information", cr = -2):
+def mutual_information_graphic(clusters:list, y:list = None,  groups = None, title = "Normalized Mutual Information", cr = -2, print = True):
     #(x:list, y:list = None, base:int = 2, **args)
     results = {}
     
@@ -442,9 +421,12 @@ def mutual_information_graphic(clusters:list, y:list = None,  groups = None, tit
         results.update({groups[i]: ch_index})
         i += 1
 
-    print_graph(results, title = title, cr = cr)
+    if print:
+        print_graph(results, title = title, cr = cr)
+    else:
+        return results
 
-def Silhouette_analysis(clusters:list, X = None, groups = None, title = "Silhouette Analysis", cr = -2):
+def silhouette_analysis(clusters:list, X = None, groups = None, title = "Silhouette Analysis", cr = -2, size = (18, 7), print = True):
     sl_av = {}
 
     for n_clusters in clusters:
@@ -452,7 +434,7 @@ def Silhouette_analysis(clusters:list, X = None, groups = None, title = "Silhoue
         n_clusters = max(list(map(int, n_clusters)))
         # Create a subplot with 1 row and 2 columns
         fig, (ax1, ax2) = plt.subplots(1, 2)
-        fig.set_size_inches(18, 7)
+        fig.set_size_inches(*size)
 
         # The 1st subplot is the silhouette plot
         # The silhouette coefficient can range from -1, 1 but in this example all
@@ -466,7 +448,6 @@ def Silhouette_analysis(clusters:list, X = None, groups = None, title = "Silhoue
         # seed of 10 for reproducibility.
         #clusterer = KMeans(n_clusters = n_clusters, random_state=3000)
         #cluster_labels = clusterer.fit_predict(X)
-
 
         # The silhouette_score gives the average value for all the samples.
         # This gives a perspective into the density and separation of the formed
@@ -493,7 +474,7 @@ def Silhouette_analysis(clusters:list, X = None, groups = None, title = "Silhoue
             size_cluster_i = len(ith_cluster_silhouette_values)#.shape[0]
             y_upper = y_lower + size_cluster_i
 
-            color = cm.nipy_spectral(float(i) / (n_clusters + 1))
+            color = cm.nipy_spectral(float(i) / (n_clusters))
             ax1.fill_betweenx(
                 np.arange(y_lower, y_upper),
                 0,
@@ -514,17 +495,24 @@ def Silhouette_analysis(clusters:list, X = None, groups = None, title = "Silhoue
 
         # The vertical line for average silhouette score of all the values
         ax1.axvline(x=silhouette_avg, color="red", linestyle="--")
-        sl_av[n_clusters] = silhouette_avg
+        sl_av[n_clusters + 1] = silhouette_avg
 
         ax1.set_yticks([])  # Clear the yaxis labels / ticks
         ax1.set_xticks([-0.1, 0, 0.2, 0.4, 0.6, 0.8, 1])
 
         # 2nd Plot showing the actual clusters formed
+##        colors = []
+##        for i in range(len(clusters)):
+##            for j in range(len(clusters[0])):
+##                #print(clusters[i][j])
+##                colors.append(clusters[i][j]/n_clusters)
+##        colors = cm.nipy_spectral(colors)
+        colors = cm.nipy_spectral(np.array(cluster_labels).astype(float) / n_clusters)
         #colors = cm.nipy_spectral(cluster_labels.astype(float) / n_clusters)
-        resp = []
-        for i in range(len(cluster_labels)):
-            resp.append(cluster_labels[i] / n_clusters)
-        colors = cm.nipy_spectral(resp)
+##        resp = []
+##        for i in range(len(cluster_labels)):
+##            resp.append(cluster_labels[i] / n_clusters)
+##        colors = cm.nipy_spectral(resp)
         ax2.scatter(
             X[:, 0], X[:, 1], marker=".", s=100, lw=0, alpha=1, c=colors, edgecolor="k"
         )
@@ -555,9 +543,12 @@ def Silhouette_analysis(clusters:list, X = None, groups = None, title = "Silhoue
             fontweight="bold",
         )
 
-        plt.show()
+        plt.show() ###voltar depois
 
-    print_graph(sl_av, cr = -2, title = "Silhouette Analysis")
+    if print:
+        print_graph(sl_av, cr = -2, title = "Silhouette Analysis")
+    else:
+        return sl_av
 
 
 if __name__ == "__main__":
@@ -569,7 +560,10 @@ if __name__ == "__main__":
     from random import random
 
     scaler = MinMaxScaler()
-    data_by_code = pd.read_csv("C:/Users/Usuario/Desktop/melhor_caso_code/DATA_CETESB_BY_CODE.csv") # Dados
+    try:
+        data_by_code = pd.read_csv("C:/Users/Usuario/Desktop/melhor_caso_code/DATA_CETESB_BY_CODE.csv") # Dados
+    except:
+        data_by_code = pd.read_csv("C:/Users/Ian_Anjos/Desktop/DATA_CETESB_BY_CODE.csv") # Dados
 
     # Selecionar as colunas que você deseja normalizar
     X = data_by_code.iloc[1:, 3:].values
@@ -582,7 +576,10 @@ if __name__ == "__main__":
     c = [2,3,6,9,12]
     l = []
     for i in c:
-        cord = json.load(open(f"C:/Users/Usuario/Desktop/melhor_caso_code/melhor_caso_{i}.json", "r"))
+        try:
+            cord = json.load(open(f"C:/Users/Usuario/Desktop/melhor_caso_code/melhor_caso_{i}.json", "r"))
+        except:
+            cord = json.load(open(f"C:/Users/Ian_Anjos/Desktop/melhor_caso_code/melhor_caso_{i}.json", "r"))
 
         for i in range(len(cord["lat"]) - 1, 0, -1):
           if cord["long"][i] < 30:
@@ -602,11 +599,12 @@ if __name__ == "__main__":
     #calinski_harabasz_graphic(l, X, c)
     #davies_boulding_graphic(l, X, c)
     #mutual_information_graphic(l, y_simulado, c)
-    #Silhouette_analysis(l, X, c)
+    #silhouette_analysis(l, X, c)
     print_metrics(l,X ,y_simulado)
-    print_metrics(pd.DataFrame({'2': [int(random()*3) for i in range(50)],
-                                '3': [int(random()*9) for i in range(50)],
-                                '6': [int(random()*5) for i in range(50)]}),
-                  pd.DataFrame({'2': [int(random()*3) for i in range(50)],
-                                '3': [int(random()*9) for i in range(50)],
-                                '6': [int(random()*5) for i in range(50)]}))
+        
+##    print_metrics(pd.DataFrame({'2': [int(random()*3) for i in range(50)],
+##                                '3': [int(random()*9) for i in range(50)],
+##                                '6': [int(random()*5) for i in range(50)]}),
+##                  pd.DataFrame({'2': [int(random()*3) for i in range(50)],
+##                                '3': [int(random()*9) for i in range(50)],
+##                                '6': [int(random()*5) for i in range(50)]}))
