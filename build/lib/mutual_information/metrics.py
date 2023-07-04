@@ -286,6 +286,7 @@ def mutual_information(x:list, y:list = None, base:int = 2, **args):
     return resp, normalized
 
 def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, errors = True):
+    
     if type(clusters) == type(pd.DataFrame()):
         clusters = clusters.T.values.tolist()
 
@@ -337,7 +338,7 @@ def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, erro
                 else:
                     colors.append('grey')
 
-        ax[i, j].bar(list(map(str,list(ch_.keys()))), ch, color=colors)
+        ax[i, j].bar(list(map(str, list(map(int, list(ch_.keys()))))), ch, color=colors)
         ax[i, j].set_xlabel("Number of clusters")
         ax[i, j].set_ylabel(f"{title} Index")
         #ax[i, j].set_suptitle(f"{title} by Number of Clusters")
@@ -349,7 +350,7 @@ def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, erro
         ax[i, j].text(min_index, ch[min_index], f'{ch[min_index]:.2f}', ha='center', va='bottom')
 
     if len(variables[0]) == 3:
-            ax[1][1].text(0.2, 0.2, 'To plot the normalized mutual information\nyou also need to pass a list of expected\nvalues as an argument.', fontsize = 12)
+            ax[1][1].text(0.15, 0.4, 'To plot the normalized mutual information\nyou also need to pass a list of expected\nvalues as an argument.', fontsize = 12)
             
     fig.suptitle(f"All Metrics")
     fig.show()
@@ -474,7 +475,7 @@ def silhouette_analysis(clusters:list, X = None, groups = None, title = "Silhoue
             size_cluster_i = len(ith_cluster_silhouette_values)#.shape[0]
             y_upper = y_lower + size_cluster_i
 
-            color = cm.nipy_spectral(float(i) / (n_clusters))
+            color = cm.nipy_spectral(float(i) / (n_clusters + 1))
             ax1.fill_betweenx(
                 np.arange(y_lower, y_upper),
                 0,
@@ -507,7 +508,7 @@ def silhouette_analysis(clusters:list, X = None, groups = None, title = "Silhoue
 ##                #print(clusters[i][j])
 ##                colors.append(clusters[i][j]/n_clusters)
 ##        colors = cm.nipy_spectral(colors)
-        colors = cm.nipy_spectral(np.array(cluster_labels).astype(float) / n_clusters)
+        colors = cm.nipy_spectral(np.array(cluster_labels).astype(float) / (n_clusters + 1))
         #colors = cm.nipy_spectral(cluster_labels.astype(float) / n_clusters)
 ##        resp = []
 ##        for i in range(len(cluster_labels)):
@@ -538,7 +539,7 @@ def silhouette_analysis(clusters:list, X = None, groups = None, title = "Silhoue
         ax2.set_ylabel("Feature space for the 2nd feature")
 
         plt.suptitle(
-            f"Silhouette analysis for K-Means clustering on sample data with n_clusters = {n_clusters}, Value of silhouette = {str(silhouette_avg)[:6]}",
+            f"Silhouette analysis for K-Means clustering on sample data with n_clusters = {n_clusters + 1}, Value of silhouette = {str(silhouette_avg)[:6]}",
             fontsize=14,
             fontweight="bold",
         )
@@ -600,11 +601,11 @@ if __name__ == "__main__":
     #davies_boulding_graphic(l, X, c)
     #mutual_information_graphic(l, y_simulado, c)
     #silhouette_analysis(l, X, c)
-    print_metrics(l,X ,y_simulado)
+    #print_metrics(l,X ,y_simulado)
         
-##    print_metrics(pd.DataFrame({'2': [int(random()*3) for i in range(50)],
-##                                '3': [int(random()*9) for i in range(50)],
-##                                '6': [int(random()*5) for i in range(50)]}),
-##                  pd.DataFrame({'2': [int(random()*3) for i in range(50)],
-##                                '3': [int(random()*9) for i in range(50)],
-##                                '6': [int(random()*5) for i in range(50)]}))
+    print_metrics(pd.DataFrame({'2': [int(random()*3) for i in range(50)],
+                                '3': [int(random()*9) for i in range(50)],
+                                '6': [int(random()*5) for i in range(50)]}),
+                  pd.DataFrame({'2': [int(random()*3) for i in range(50)],
+                                '3': [int(random()*9) for i in range(50)],
+                                '6': [int(random()*5) for i in range(50)]}))
