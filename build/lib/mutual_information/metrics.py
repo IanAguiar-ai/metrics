@@ -285,7 +285,26 @@ def mutual_information(x:list, y:list = None, base:int = 2, **args):
         
     return resp, normalized
 
-def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, errors = True):
+def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, **args):
+    """
+    Assemble some graphs of metrics, the metrics are:
+    • silhouette analysis;
+    • calinski_harabasz;
+    • davies_boulding;
+    • mutual_information;
+
+    :param clusters: clustering of some method
+    :type clusters: list of lists, pandas dataframe or numpy array
+
+    :param dataframe: The dataframe that was used for clustering
+    :type dataframe: dataframe od pandas or list of lists
+
+    :param clusters_real: expected response, this parameter is optional, it will be used to print normalized mutual information
+    :type clusters_real: list
+
+    ▬ return:
+    • None
+    """
     
     if type(clusters) == type(pd.DataFrame()):
         clusters = clusters.T.values.tolist()
@@ -298,17 +317,26 @@ def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, erro
         c.append(max(cluster) + 1 - min(cluster))
 
     r1 = silhouette_analysis(clusters, dataframe, c, print = False)
-    r2 = calinski_harabasz_graphic(clusters, dataframe, c, print = False)
-    r3 = davies_boulding_graphic(clusters, dataframe, c, print = False)
+    r2 = calinski_harabasz(clusters, dataframe, c, print = False)
+    r3 = davies_boulding(clusters, dataframe, c, print = False)
     if clusters_real != None:
-        r4 = mutual_information_graphic(clusters, clusters_real, c, print = False)
+        r4 = mutual_information_graph(clusters, clusters_real, c, print = False)
 
-    fig, ax = plt.subplots(nrows = 2, ncols = 2, figsize = (14, 8))
+    if not "figsize" in args:
+        args["figsize"] = (14, 8)
+
+    if not "color" in args:
+        args["color"] = ["green", "grey"]
+
+    if not "best" in args:
+        args["best"] = 2
+
+    fig, ax = plt.subplots(nrows = 2, ncols = 2, figsize = args["figsize"])
     try:
         variables = [[0,0,1,1],
                      [0,1,0,1],
                      [r1, r2, r3, r4],
-                     [2, -1, 2, 2],
+                     [-args["best"], args["best"] - 1, -args["best"], -args["best"]],
                      ["Silhouette Analysis",
                       "Calinski-Harabasz",
                       "Davies-Boulding",
@@ -317,7 +345,7 @@ def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, erro
         variables = [[0,0,1],
                      [0,1,0],
                      [r1, r2, r3],
-                     [2, -1, 2],
+                     [-args["best"], args["best"] - 1, -args["best"],],
                      ["Silhouette Analysis",
                       "Calinski-Harabasz",
                       "Davies-Boulding"]]
@@ -329,14 +357,14 @@ def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, erro
         for val in ch:
             if cr < 0:
                 if val >= sorted(ch)[cr]:
-                    colors.append('red')
+                    colors.append(args["color"][0])
                 else:
-                    colors.append('grey')
+                    colors.append(args["color"][1])
             else:
                 if val <= sorted(ch)[cr]:
-                    colors.append('red')
+                    colors.append(args["color"][0])
                 else:
-                    colors.append('grey')
+                    colors.append(args["color"][1])
 
         ax[i, j].bar(list(map(str, list(map(int, list(ch_.keys()))))), ch, color=colors)
         ax[i, j].set_xlabel("Number of clusters")
@@ -354,7 +382,55 @@ def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, erro
             
     fig.suptitle(f"All Metrics")
     fig.show()
-    
+
+    if not "set_fontsize" in args:
+        args["set_fontsize"] = 10
+
+        
+    if not "figsize_table" in args:
+        args["figsize_table"] = (9, 3)
+
+    if not "scale" in args:
+        args["scale"] = (1, 2)
+
+    def conv(x, decimals = 4):
+        x = str(x)
+        return x[:x.find(".") + decimals]
+
+    def best(l:list, func = max):
+        l_ = list(map(float, l))
+        for i in range(len(l_)):
+            if l_[i] == func(l_):
+                k = i
+        l[k] = l[k] + "*"
+        return l
+
+
+    if len(variables[0]) == 3:
+        df = pd.DataFrame({"Number of\nClusters":r1.keys(),
+                           "Silhouette\nAnalysis":best(list(map(conv, r1.values()))),
+                           "Calinski\nHarabasz":best(list(map(conv, r2.values()))),
+                           "Davies\nBoulding":best(list(map(conv, r3.values())), min)})
+
+    else:
+        df = pd.DataFrame({"Number of\nClusters":r1.keys(),
+                           "Silhouette\nAnalysis":best(list(map(conv, r1.values()))),
+                           "Calinski\nHarabasz":best(list(map(conv, r2.values()))),
+                           "Davies\nBoulding":best(list(map(conv, r3.values())), min),
+                           "Normalized\nMutual Information":best(list(map(conv, r4.values())))})
+
+    fig, ax = plt.subplots(figsize = args["figsize_table"])
+    ax.axis('off')
+
+    table = ax.table(cellText = df.values, colLabels = df.columns, loc = 'center', cellLoc = 'center')
+
+    table.auto_set_font_size(False)
+    table.set_fontsize(args["set_fontsize"])
+    table.scale(*args["scale"])
+
+    fig.show()  
+
+     
 
 def print_graph(results:dict, cr:int = -2, title:str = "title"):
     ch = list(results.values())
@@ -384,7 +460,28 @@ def print_graph(results:dict, cr:int = -2, title:str = "title"):
 
     plt.show()
 
-def calinski_harabasz_graphic(clusters:list, X = None, groups = None, title = "Calinski-Harabasz", cr = -2, print = True):
+def calinski_harabasz(clusters:list, X = None, groups = None, title = "Calinski-Harabasz", cr = -2, print = True):
+    """
+    Metric
+
+    :param clusters: clustering of some method
+    :type clusters: list of lists, pandas dataframe or numpy array
+
+    :param X: The dataframe that was used for clustering
+    :type X: dataframe od pandas or list of lists
+
+    :param groups: Group numbering, é opcional
+    :type groups: list
+
+    :param print: Whether it should be printed or not
+    :type print: bool
+
+    ▬ return:
+    if print == True:
+        • None
+    else:
+        • Results
+    """
     results = {}
     
     i = 0
@@ -398,7 +495,28 @@ def calinski_harabasz_graphic(clusters:list, X = None, groups = None, title = "C
     else:
         return results
 
-def davies_boulding_graphic(clusters:list, X = None, groups = None, title = "Davies-Boulding", cr = 1, print = True):
+def davies_boulding(clusters:list, X = None, groups = None, title = "Davies-Boulding", cr = 1, print = True):
+    """
+    Metric
+
+    :param clusters: clustering of some method
+    :type clusters: list of lists, pandas dataframe or numpy array
+
+    :param X: The dataframe that was used for clustering
+    :type X: dataframe od pandas or list of lists
+
+    :param groups: Group numbering, é opcional
+    :type groups: list
+
+    :param print: Whether it should be printed or not
+    :type print: bool
+
+    ▬ return:
+    if print == True:
+        • None
+    else:
+        • Results
+    """
     results = {}
     
     i = 0
@@ -412,7 +530,28 @@ def davies_boulding_graphic(clusters:list, X = None, groups = None, title = "Dav
     else:
         return results
 
-def mutual_information_graphic(clusters:list, y:list = None,  groups = None, title = "Normalized Mutual Information", cr = -2, print = True):
+def mutual_information_graph(clusters:list, y:list = None,  groups = None, title = "Normalized Mutual Information", cr = -2, print = True):
+    """
+    Metric
+
+    :param clusters: clustering of some method
+    :type clusters: list of lists, pandas dataframe or numpy array
+
+    :param X: The dataframe that was used for clustering
+    :type X: dataframe od pandas or list of lists
+
+    :param groups: Group numbering, é opcional
+    :type groups: list
+
+    :param print: Whether it should be printed or not
+    :type print: bool
+
+    ▬ return:
+    if print == True:
+        • None
+    else:
+        • Results
+    """
     #(x:list, y:list = None, base:int = 2, **args)
     results = {}
     
@@ -428,6 +567,27 @@ def mutual_information_graphic(clusters:list, y:list = None,  groups = None, tit
         return results
 
 def silhouette_analysis(clusters:list, X = None, groups = None, title = "Silhouette Analysis", cr = -2, size = (18, 7), print = True):
+    """
+    Metric
+
+    :param clusters: clustering of some method
+    :type clusters: list of lists, pandas dataframe or numpy array
+
+    :param X: The dataframe that was used for clustering
+    :type X: dataframe od pandas or list of lists
+
+    :param groups: Group numbering, é opcional
+    :type groups: list
+
+    :param print: Whether it should be printed or not
+    :type print: bool
+
+    ▬ return:
+    if print == True:
+        • None
+    else:
+        • Results
+    """
     sl_av = {}
 
     for n_clusters in clusters:
@@ -544,7 +704,7 @@ def silhouette_analysis(clusters:list, X = None, groups = None, title = "Silhoue
             fontweight="bold",
         )
 
-        plt.show() ###voltar depois
+        #plt.show() ###voltar depois
 
     if print:
         print_graph(sl_av, cr = -2, title = "Silhouette Analysis")
@@ -597,15 +757,16 @@ if __name__ == "__main__":
 
     #Tenho a matriz...
     
-    #calinski_harabasz_graphic(l, X, c)
-    #davies_boulding_graphic(l, X, c)
-    #mutual_information_graphic(l, y_simulado, c)
-    #silhouette_analysis(l, X, c)
-    #print_metrics(l,X ,y_simulado)
-        
+##    calinski_harabasz(l, X, c)
+##    davies_boulding(l, X, c)
+##    mutual_information_graph(l, y_simulado, c)
+##    silhouette_analysis(l, X, c)
+##    print_metrics(l,X ,y_simulado)
+##        
     print_metrics(pd.DataFrame({'2': [int(random()*3) for i in range(50)],
                                 '3': [int(random()*9) for i in range(50)],
                                 '6': [int(random()*5) for i in range(50)]}),
                   pd.DataFrame({'2': [int(random()*3) for i in range(50)],
                                 '3': [int(random()*9) for i in range(50)],
                                 '6': [int(random()*5) for i in range(50)]}))
+        
