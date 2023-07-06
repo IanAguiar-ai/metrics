@@ -336,7 +336,7 @@ def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, **ar
         variables = [[0,0,1,1],
                      [0,1,0,1],
                      [r1, r2, r3, r4],
-                     [-args["best"], args["best"] - 1, -args["best"], -args["best"]],
+                     [-args["best"], -args["best"], args["best"] - 1, -args["best"]],
                      ["Silhouette Analysis",
                       "Calinski-Harabasz",
                       "Davies-Boulding",
@@ -345,7 +345,7 @@ def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, **ar
         variables = [[0,0,1],
                      [0,1,0],
                      [r1, r2, r3],
-                     [-args["best"], args["best"] - 1, -args["best"],],
+                     [-args["best"], -args["best"], args["best"] - 1],
                      ["Silhouette Analysis",
                       "Calinski-Harabasz",
                       "Davies-Boulding"]]
@@ -397,12 +397,16 @@ def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, **ar
         x = str(x)
         return x[:x.find(".") + decimals]
 
+    def mod(a):
+        if a < 0:
+            return -a
+        return a
+
     def best(l:list, func = max):
         l_ = list(map(float, l))
         for i in range(len(l_)):
-            if l_[i] == func(l_):
-                k = i
-        l[k] = l[k] + "*"
+            if mod(l_[i]) > mod(func(l_)) * 0.9 and mod(l_[i]) < mod(func(l_)) * 1.1:
+                l[i] = l[i] + "*"
         return l
 
 
@@ -704,7 +708,7 @@ def silhouette_analysis(clusters:list, X = None, groups = None, title = "Silhoue
             fontweight="bold",
         )
 
-        #plt.show() ###voltar depois
+        plt.show() ###voltar depois
 
     if print:
         print_graph(sl_av, cr = -2, title = "Silhouette Analysis")
@@ -761,12 +765,14 @@ if __name__ == "__main__":
 ##    davies_boulding(l, X, c)
 ##    mutual_information_graph(l, y_simulado, c)
 ##    silhouette_analysis(l, X, c)
-##    print_metrics(l,X ,y_simulado)
+    print_metrics(l,X ,y_simulado)
 ##        
-    print_metrics(pd.DataFrame({'2': [int(random()*3) for i in range(50)],
-                                '3': [int(random()*9) for i in range(50)],
-                                '6': [int(random()*5) for i in range(50)]}),
-                  pd.DataFrame({'2': [int(random()*3) for i in range(50)],
-                                '3': [int(random()*9) for i in range(50)],
-                                '6': [int(random()*5) for i in range(50)]}))
+##    print_metrics(pd.DataFrame({'2': [int(random()*2) for i in range(50)],
+##                                '3': [int(random()*3) for i in range(50)],
+##                                '6': [int(random()*6) for i in range(50)],
+##                                '8': [int(random()*8) for i in range(50)]}),
+##                  pd.DataFrame({'2': [int(random()*2) for i in range(50)],
+##                                '3': [int(random()*3) for i in range(50)],
+##                                '6': [int(random()*6) for i in range(50)],
+##                                '8': [int(random()*8) for i in range(50)]}))
         
