@@ -370,7 +370,12 @@ def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, **ar
         ax[i, j].set_xlabel("Number of clusters")
         ax[i, j].set_ylabel(f"{title} Index")
         #ax[i, j].set_suptitle(f"{title} by Number of Clusters")
-        ax[i, j].set_ylim((min(ch)/max(ch)) * min(ch), max(ch) * 1.1)
+        if min(ch) > 0 and max(ch) > 0:
+            ax[i, j].set_ylim((min(ch)/max(ch)) * min(ch), max(ch) * 1.1)
+        elif min(ch) < 0 and max(ch) < 0:
+            ax[i, j].set_ylim(min(ch) - min(ch) * 0.05, 0)
+        else:
+            ax[i, j].set_ylim(min(ch) * 1.05, max(ch) * 1.05)
 
         max_index = np.argmax(ch)
         min_index = np.argmin(ch)
@@ -405,7 +410,9 @@ def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, **ar
     def best(l:list, func = max):
         l_ = list(map(float, l))
         for i in range(len(l_)):
-            if mod(l_[i]) > mod(func(l_)) * 0.9 and mod(l_[i]) < mod(func(l_)) * 1.1:
+            if mod(l_[i]) == mod(func(l_)):
+                l[i] = l[i] + "**"
+            elif mod(l_[i]) > mod(func(l_)) * 0.9 and mod(l_[i]) < mod(func(l_)) * 1.1:
                 l[i] = l[i] + "*"
         return l
 
@@ -679,7 +686,7 @@ def silhouette_analysis(clusters:list, X = None, groups = None, title = "Silhoue
 ##            resp.append(cluster_labels[i] / n_clusters)
 ##        colors = cm.nipy_spectral(resp)
         ax2.scatter(
-            X[:, 0], X[:, 1], marker=".", s=100, lw=0, alpha=1, c=colors, edgecolor="k"
+            X[:, 0], X[:, 1], marker = ".", s = 100, lw = 0, alpha = 1, c = colors, edgecolor = "k"
         )
 
         # Labeling the clusters
