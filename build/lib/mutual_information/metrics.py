@@ -303,7 +303,7 @@ def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, **ar
     :type clusters_real: list
 
     ▬ return:
-    • None
+    • Dictionary
     """
     
     if type(clusters) == type(pd.DataFrame()):
@@ -418,18 +418,19 @@ def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, **ar
 
 
     if len(variables[0]) == 3:
-        df = pd.DataFrame({"Number of\nClusters":r1.keys(),
-                           "Silhouette\nAnalysis":best(list(map(conv, r1.values()))),
-                           "Calinski\nHarabasz":best(list(map(conv, r2.values()))),
-                           "Davies\nBoulding":best(list(map(conv, r3.values())), min)})
+        to_return = {"Number of\nClusters":r1.keys(),
+                     "Silhouette\nAnalysis":best(list(map(conv, r1.values()))),
+                     "Calinski\nHarabasz":best(list(map(conv, r2.values()))),
+                     "Davies\nBoulding":best(list(map(conv, r3.values())), min)}
 
     else:
-        df = pd.DataFrame({"Number of\nClusters":r1.keys(),
-                           "Silhouette\nAnalysis":best(list(map(conv, r1.values()))),
-                           "Calinski\nHarabasz":best(list(map(conv, r2.values()))),
-                           "Davies\nBoulding":best(list(map(conv, r3.values())), min),
-                           "Normalized\nMutual Information":best(list(map(conv, r4.values())))})
-
+        to_return = {"Number of\nClusters":r1.keys(),
+                     "Silhouette\nAnalysis":best(list(map(conv, r1.values()))),
+                     "Calinski\nHarabasz":best(list(map(conv, r2.values()))),
+                     "Davies\nBoulding":best(list(map(conv, r3.values())), min),
+                     "Normalized\nMutual Information":best(list(map(conv, r4.values())))}
+        
+    df = pd.DataFrame(to_return)
     fig, ax = plt.subplots(figsize = args["figsize_table"])
     ax.axis('off')
 
@@ -439,8 +440,9 @@ def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, **ar
     table.set_fontsize(args["set_fontsize"])
     table.scale(*args["scale"])
 
-    fig.show()  
+    fig.show()
 
+    return to_return
      
 
 def print_graph(results:dict, cr:int = -2, title:str = "title"):
@@ -772,7 +774,7 @@ if __name__ == "__main__":
 ##    davies_boulding(l, X, c)
 ##    mutual_information_graph(l, y_simulado, c)
 ##    silhouette_analysis(l, X, c)
-    print_metrics(l,X ,y_simulado)
+    t = print_metrics(l,X ,y_simulado)
 ##        
 ##    print_metrics(pd.DataFrame({'2': [int(random()*2) for i in range(50)],
 ##                                '3': [int(random()*3) for i in range(50)],
