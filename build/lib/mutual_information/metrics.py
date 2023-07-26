@@ -348,7 +348,7 @@ def print_metrics(clusters:list, dataframe:list, clusters_real:list = None, **ar
                      [-args["best"], -args["best"], args["best"] - 1],
                      ["Silhouette Analysis",
                       "Calinski-Harabasz",
-                      "Davies-Boulding"]]
+                      "Davies-Bouldin"]]
     
     for i, j, ch_, cr, title in zip(*variables):
         #print(i, j, cr)
