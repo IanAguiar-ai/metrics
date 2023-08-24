@@ -712,7 +712,7 @@ def silhouette_analysis(clusters:list, X = None, groups = None, title = "Silhoue
         ax2.set_ylabel("Feature space for the 2nd feature")
 
         plt.suptitle(
-            f"Silhouette analysis for K-Means clustering on sample data with n_clusters = {n_clusters + 1}, Value of silhouette = {str(silhouette_avg)[:6]}",
+            f"Silhouette analysis on sample data with n_clusters = {n_clusters + 1}, Value of silhouette = {str(silhouette_avg)[:6]}",
             fontsize=14,
             fontweight="bold",
         )
